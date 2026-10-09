@@ -17,7 +17,7 @@ from pathlib import Path
 from interview import run_interview
 from collectorOrchestrator import run_pipeline
 from ranker import rank
-from writer import write_digest, render, send_email
+from RonBurgundy import write_digest, render, send_email
 
 from profile import Profile
 
