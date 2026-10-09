@@ -1,0 +1,41 @@
+name: Daily digest
+
+on:
+  schedule:
+    # Cron runs in UTC. 06:17 UTC = 07:17 in London during summer time (BST)
+    # and 06:17 in winter (GMT).
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create profile.json from secret
+        env:
+          PROFILE_JSON: ${{ secrets.PROFILE_JSON }}
+        run: printf '%s' "$PROFILE_JSON" > profile.json
+
+      - name: Build and send the digest
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
+          EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: python main.py --send
